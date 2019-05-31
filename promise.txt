@@ -1,0 +1,60 @@
+﻿1.promise简单使用方式
+	//例1
+
+	function getUserId() {
+    
+	return new Promise(function(resolve) {
+        //异步请求
+        
+			http.get(url, function(results) {
+            
+				resolve(results.id)
+        
+			})
+    
+	})
+}
+	
+
+getUserId().then(function(id) {
+    
+		//一些处理
+
+	})
+
+
+getUserId方法返回一个promise，可以通过它的then方法注册(注意注册这个词)在promise异步操作成功时执行的回调。这种执行方式，使得异步调用变得十分顺手。
+
+2.promise简单雏形
+	function Promese(fn){
+		var value = null;
+		var callback = []; //可能有多个回调，所以是数组
+		
+		this.then = function(onFulfilled){
+			callback.push(onFulfilled);
+			return this; //支持链式调用
+		}
+
+		function resolve(value){
+			callback.forEach(function(callback){
+				callback(value);
+			)};
+		}
+
+		fn(resolve);
+		
+	}
+1.调用then方法，将想要在Promise异步操作成功时执行的回调放入callbacks队列，其实也就是注册回调函数，可以向观察者模式方向思考；
+
+2.创建Promise实例时传入的函数会被赋予一个函数类型的参数，即resolve，它接收一个参数value，代表异步操作返回的结果，当一步操作执行成功后，用户会调用resolve方法，这时候其实真正执行的操作是将callbacks队列中的回调一一执行；
+
+
+
+上述代码可能还存在一个问题：如果在then方法注册回调之前，resolve函数就执行了，怎么办？比如promise内部的函数是同步函数：
+可以加入setTimeout
+就是通过setTimeout机制，将resolve中执行回调的逻辑放置到JS任务队列末尾，以保证在resolve执行时，then方法的回调函数已经注册完成
+
+但是，这样好像还存在一个问题，可以细想一下：如果Promise异步操作已经成功，这时，在异步操作成功之前注册的回调都会执行，但是在Promise异步操作成功这之后调用的then注册的回调就再也不会执行了，这显然不是我们想要的。
+为了解决上一节抛出的问题，我们必须加入状态机制，也就是大家熟知的pending、fulfilled、rejected。
+
+那么这里问题又来了，如果用户再then函数里面注册的仍然是一个Promise，该如何解决？
