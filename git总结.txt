@@ -83,3 +83,25 @@
 　　3.git push origin --all 推送主干和分支
 
 　　4.git push --tags 推送标签
+19.版本回退
+	git log 查看从最近到最远的提交记录
+	git reset --HEAD^ 回退上个版本
+	如果想把回退到新的（回退的回退），用git reflog 查看所有曾经存在过的历史提交，更新纪律.
+	在使用git reset --hard id（这个id为git生成的哈希值）
+	
+	注意回退有三个参数：
+		--hard : 回退版本库，暂存区，工作区。（因此我们修改过的代码就没了，需要谨慎使用）
+
+		--mixed: 回退版本库，暂存区。(--mixed为git reset的默认参数，即当任何参数都不加的时候的参数)
+
+		--soft: 回退版本库。
+		
+20.远程分支回滚的三种方法：
+
+	1.自己的分支回滚直接用reset，然后强制推送git push -f
+	2.公共分支回滚用revert，使用git reset回退公共远程分支的版本后，需要其他所有人手动用远程master分支覆盖本地master分支，显然，这不是优雅的回退方法，
+		git revert HEAD                     //撤销最近一次提交
+		git revert HEAD~1                   //撤销上上次的提交，注意：数字从0开始
+		git revert 0ffaacc                  //撤销0ffaacc这次提交
+		git revert 命令意思是撤销某次提交。它会产生一个新的提交，虽然代码回退了，但是版本依然是向前的，所以，当你用revert回退之后，所有人pull之后，他们的代码也自动的回退了。 
+	错的太远了直接将代码全部删掉，用正确代码替代
